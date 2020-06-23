@@ -7,6 +7,9 @@ from ..ProcessData import load_seq_data,oh2seq,saveseq
 from .kmer_statistics import kmer_statistics
 import os
 import math
+import matplotlib as plt
+from matplotlib.backends.backend_pdf import PdfPages
+plt.use('Agg')
 
 class WGAN:
     def GeneratorNet(self, z, is_training=True, reuse=False):
@@ -162,10 +165,11 @@ class WGAN:
         gen = self.inf_train_gen()
         counter = 1
         start_time = time.time()
+        train_6js = []
+        val_6js = []
         for epoch in range(0, self.epoch):
             # get batch data
             for idx in range(0, self.iteration):
-
                 # update D network
                 for i in range(self.n_critic):
                     _data = gen.__next__()
@@ -202,7 +206,8 @@ class WGAN:
                     fake_js[0],
                     fake_js[1],
                     fake_js[2]))
-            
+            train_6js.append(fake_js[1])
+            val_6js.append(fake_kmer[1].js_with(val_kmer[1]))
             
             # After an epoch, start_batch_id is set to zero
             # non-zero value is only for the first epoch after loading pre-trained model
@@ -215,6 +220,29 @@ class WGAN:
 
         # save model for final step
         self.save(self.checkpoint_dir, counter)
+        
+        pdf = PdfPages(log_dir+'/6mer_frequence.pdf')
+        unique_kmers = val_kmer[1].unique_kmers + fake_kmer[1].unique_kmers
+        p_nat = []
+        p_fake = []
+        for kmers in unique_kmers:
+            p_nat.append(val_kmer[1]._kmer_counts[kmers]/val_kmer[1]._total_kmers)
+            p_fake.append(fake_kmer[1]._kmer_counts[kmers]/fake_kmer[1]._total_kmers)
+        plt.scatter(p_nat,p_fake)
+        plt.xlabel('Natural 6-mer frequences')
+        plt.ylabel('Generative 6-mer frequences')
+        pdf.savefig()
+        pdf.close()
+        
+        pdf = PdfPages(log_dir+'/6mer_JS_Distance.pdf')
+        plt.figure()
+        plt.plot(np.arange(len(train_6js)),train_6js)
+        plt.plot(np.arange(len(train_6js)),val_6js)
+        plt.plot([0,len(train_6js)],[val_6js[1],val_6js[1]])
+        plt.xlabel('JS Distance')
+        plt.ylabel('epoch')
+        pdf.savefig()
+        pdf.close()
         return
     
     def inf_train_gen(self):
@@ -266,9 +294,4 @@ class WGAN:
         else:
             print(" [*] Failed to find a checkpoint")
             return False, 0
-        
-#def plot(val,x,name):
-#    import matplotlib.pyplot as plt
-#    plt.plot(x)
-#    plt.plot([0,len(x)],[val,val])
-#    plt.savefig(name+'.jpg')
+
