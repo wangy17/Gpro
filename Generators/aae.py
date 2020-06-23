@@ -7,6 +7,10 @@ from ..ProcessData import load_seq_data,oh2seq,seq2oh,saveseq
 from .kmer_statistics import kmer_statistics
 import os
 import math
+import matplotlib as plt
+from matplotlib.backends.backend_pdf import PdfPages
+plt.use('Agg')
+
 class AAE:
     
     def EncoderNet(self, x, is_training=True, reuse=False):
@@ -188,6 +192,8 @@ class AAE:
         start_time = time.time()
         conv = 0
         best_js = 1
+        train_6js = []
+        val_6js = []
         for epoch in range(1, 1+self.epoch):
             # get batch data
             for idx in range(1, 1+self.iteration):
@@ -235,6 +241,8 @@ class AAE:
                     val_js[0],
                     val_js[1],
                     val_js[2]))
+            train_6js.append(fake_js[1])
+            val_6js.append(val_js[1])
             if best_js > val_js[1]:
                 best_js = val_js[1]
                 conv = 0
@@ -246,14 +254,28 @@ class AAE:
             # After an epoch, start_batch_id is set to zero
             # non-zero value is only for the first epoch after loading pre-trained model
 
-            # save model
-            self.save(self.checkpoint_dir, counter)
-
-            # show temporal results
-            # self.visualize_results(epoch)
-
-        # save model for final step
-        self.save(self.checkpoint_dir, counter)
+        pdf = PdfPages(log_dir+'/6mer_frequence.pdf')
+        unique_kmers = val_kmer[1].unique_kmers + fake_kmer[1].unique_kmers
+        p_nat = []
+        p_fake = []
+        for kmers in unique_kmers:
+            p_nat.append(val_kmer[1]._kmer_counts[kmers]/val_kmer[1]._total_kmers)
+            p_fake.append(fake_kmer[1]._kmer_counts[kmers]/fake_kmer[1]._total_kmers)
+        plt.scatter(p_nat,p_fake)
+        plt.xlabel('Natural 6-mer frequences')
+        plt.ylabel('Generative 6-mer frequences')
+        pdf.savefig()
+        pdf.close()
+        
+        pdf = PdfPages(log_dir+'/6mer_JS_Distance.pdf')
+        plt.figure()
+        plt.plot(np.arange(len(train_6js)),train_6js)
+        plt.plot(np.arange(len(train_6js)),val_6js)
+        plt.plot([0,len(train_6js)],[val_6js[1],val_6js[1]])
+        plt.xlabel('JS Distance')
+        plt.ylabel('epoch')
+        pdf.savefig()
+        pdf.close()
         return
     
     def inf_train_gen(self):
