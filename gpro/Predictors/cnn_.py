@@ -28,7 +28,7 @@ class CNN():
                    train_data,
                    val_data=None,
                    DIM = 128,
-                   kernel_size = 5
+                   kernel_size = 5,
                    model_name='cnn'
                    ):
         self.x,self.y = load_fun_data(train_data)
@@ -96,7 +96,7 @@ class CNN():
         return
 
     def load(self,weight_dir='./predict_model'):
-        self.model.load_weights(weight_dir+'/'+self.model_name+'weight.h5'')
+        self.model.load_weights(weight_dir+'/'+self.model_name+'weight.h5')
         return
     
     def Predictor(self,seq,datatype='str'):

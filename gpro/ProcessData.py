@@ -59,8 +59,10 @@ def load_fun_data(filename):
     with open(filename,'r') as f:
         for l in f:
             l = str.split(l)
-            seq.append(l[-2])
-            label.append(float(l[-1]))
+            s = float(l[-1])
+            if np.isnan(s) == False:
+                seq.append(l[-2])
+                label.append(s)
     label = np.array(label)
     label = np.reshape(label,[label.shape[0],1])
     return seq,label
