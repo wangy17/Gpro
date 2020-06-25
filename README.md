@@ -73,6 +73,6 @@ opt.run()
 ```
 Promoters optimized by Optimizer have higher expression than natural promoters
 
-Function score of generated sequences during optimizing would be saved at folder 'log/'
+Function score of generated sequences during optimizing, optimized sequences and following graph would be saved at folder 'EAresult/'
 
 ![Promoters optimized by Optimizer have higher expression than natural promoters](https://github.com/WangLabTHU/Gpro/blob/master/yeast3.jpg)
