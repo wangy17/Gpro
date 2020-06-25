@@ -249,8 +249,8 @@ class VAE:
             plt.plot(np.arange(len(train_6js)),val_6js)
             plt.plot([0,len(train_6js)-1],[val_6js[1],val_6js[1]])
             plt.legend(['JS_train','JS_valid','JS_control'])
-            plt.xlabel('JS Distance')
-            plt.ylabel('epoch')
+            plt.ylabel('JS Distance')
+            plt.xlabel('epoch')
             pdf.savefig()
             pdf.close()
         return

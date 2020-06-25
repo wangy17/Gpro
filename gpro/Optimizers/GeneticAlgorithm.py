@@ -3,11 +3,17 @@ import os
 import math
 from ..ProcessData import seq2oh,oh2seq,saveseq,GetCharMap
 import random
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib as mpl
+mpl.use('Agg')
+
 
 class GeneticAthm():
     def __init__(self,
                  Generator,
                  Predictor,
+                 Valid = None,
                  z_dim=64):
         self.z_dim = z_dim
         self.x = np.random.normal(size=(3200,z_dim))
@@ -35,6 +41,19 @@ class GeneticAthm():
         except:
             print("PredictorError: Predictor(Generator(x)) can't run")
             raise
+        self.Valid = Valid
+        if Valid is None:
+            try:
+                Score = self.Valid(self.Seqs)
+                if type(Score) is not np.ndarray:
+                    print("ValidError: Output of Valid(Generator(x)) must be a numpy.ndarray")
+                    raise
+                elif  len(Score.shape) != 1 or Score.shape[0] != len(self.Seqs):
+                    print("ValidError: Except shape of Valid(Generator(x)) is ({},) but got a {}".format(len(self.Seqs),str(Score.shape)))
+                    raise
+            except:
+                print("ValidError: Valid(Generator(x)) can't run")
+                raise
             
     def run(self,
             outdir='./EAresult',
@@ -56,6 +75,12 @@ class GeneticAthm():
         self.Score = self.Score[I]
         self.x = self.x[I,:]
         self.oh = self.oh[I,:,:]
+        scores = []
+        convIter = 0
+        if self.Valid is None:
+            bestscore = np.max(self.Valid(self.Seqs))
+        else:
+            bestscore = np.max(self.Predictor(self.Seqs))
         for iteration in range(1,1+self.MaxIter):
             Poolsize = self.Score.shape[0]
             Nnew = math.ceil(Poolsize*self.P_new)
@@ -82,6 +107,7 @@ class GeneticAthm():
             self.x = self.x[:MaxPoolsize, :]
             self.oh = self.oh[:MaxPoolsize, :, :]
             self.Score = self.Score[:MaxPoolsize]
+            
             print('Iter = ' + str(iteration) + ' , BestScore = ' + str(self.Score[0]))
             if iteration%100 == 0:
                 np.save(outdir+'/ExpIter'+str(iteration),self.Score)
@@ -89,6 +115,35 @@ class GeneticAthm():
                 np.save(outdir+'/latentv'+str(iteration),self.x)
                 saveseq(outdir+'/SeqIter'+str(iteration)+'.fa',Seq)
                 print('Iter {} was saved!'.format(iteration))
+            
+                if self.Valid is None:
+                    valscore = self.Valid(oh2seq(self.oh,self.invcharmap))
+                    scores.append(valscore)
+                else:
+                    scores.append(self.Score)
+                if np.max(scores[-1]) > bestscore:
+                    bestscore = np.max(scores[-1])
+                else:
+                    break
+        pdf = PdfPages(outdir+'/each_iter_distribution.pdf')
+        plt.figure()
+        plt.boxplot(scores)
+        plt.xlabel('Iteration')
+        plt.ylabel('Score')
+        pdf.savefig()
+        pdf.close()
+        
+        pdf = PdfPages(outdir+'/compared_with_natural.pdf')
+        plt.figure()
+        if self.Valid is None:
+            nat_score = self.Valid(self.Seqs)
+        else:
+            nat_score = self.Predictor(self.Seqs)
+        plt.boxplot([nat_score,scores[-1]])
+        plt.ylabel('Score')
+        plt.xticks([1,2],['Natural','Optimized'])
+        pdf.savefig()
+        pdf.close()
         return
     
     def PMutate(self, z): #单点突变
