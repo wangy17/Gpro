@@ -43,25 +43,26 @@ class GeneticAthm():
             raise
         self.Valid = Valid
         if Valid is None:
-            try:
-                Score = self.Valid(self.Seqs)
-                if type(Score) is not np.ndarray:
-                    print("ValidError: Output of Valid(Generator(x)) must be a numpy.ndarray")
-                    raise
-                elif  len(Score.shape) != 1 or Score.shape[0] != len(self.Seqs):
-                    print("ValidError: Except shape of Valid(Generator(x)) is ({},) but got a {}".format(len(self.Seqs),str(Score.shape)))
-                    raise
-            except:
-                print("ValidError: Valid(Generator(x)) can't run")
+            return
+        try:
+            Score = self.Valid(self.Seqs)
+            if type(Score) is not np.ndarray:
+                print("ValidError: Output of Valid(Generator(x)) must be a numpy.ndarray")
                 raise
+            elif  len(Score.shape) != 1 or Score.shape[0] != len(self.Seqs):
+                print("ValidError: Except shape of Valid(Generator(x)) is ({},) but got a {}".format(len(self.Seqs),str(Score.shape)))
+                raise
+        except:
+            print("ValidError: Valid(Generator(x)) can't run")
+            raise
             
     def run(self,
             outdir='./EAresult',
-            MaxPoolsize=20000,
+            MaxPoolsize=2000,
             P_rep=0.3,
             P_new=0.25,
             P_elite=0.25,
-            MaxIter=5000):
+            MaxIter=1000):
         self.outdir = outdir
         if os.path.exists(self.outdir) == False:
             os.makedirs(self.outdir)
@@ -177,14 +178,13 @@ class GeneticAthm():
         return Parent
     
     def delRep(self, Onehot, p):
-        I = []
+        I = set([])
         n = Onehot.shape[0]
         i = 0
         while i < n-1:
             if i not in I:
-                for j in range(i+1,n):
-                    if j in I: continue
-                    if np.sum(Onehot[i,:,:] != Onehot[j,:,:]) / (Onehot.shape[1]*2) < p:
-                        I.append(j)
+                a = np.tile(Onehot[i,:,:],(n-i))
+                I_new = set(np.where(np.sum(a != Onehot[(i+1):,:,:],axis=0) / (Onehot.shape[1]*2) < p)[0])
+                I = I|I_new
             i += 1
         return I
