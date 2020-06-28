@@ -68,7 +68,7 @@ Scatter of preditive value and true value would be saved at folder 'log/'.
 
 Using Genetic algorithm to optimize promoter sequences:
 ```
-opt = gpro.Optimizers.GA(gen.Generator,pred.Pridictor)
+opt = gpro.Optimizers.GeneticAthm(gen.Generator,pred.Pridictor)
 opt.run()
 ```
 Promoters optimized by Optimizer have higher expression than natural promoters
