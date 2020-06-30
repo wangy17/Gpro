@@ -79,9 +79,9 @@ class GeneticAthm():
         scores = []
         convIter = 0
         if self.Valid is None:
-            bestscore = np.max(self.Valid(self.Seqs))
-        else:
             bestscore = np.max(self.Predictor(self.Seqs))
+        else:
+            bestscore = np.max(self.Valid(self.Seqs))
         for iteration in range(1,1+self.MaxIter):
             Poolsize = self.Score.shape[0]
             Nnew = math.ceil(Poolsize*self.P_new)
@@ -118,10 +118,11 @@ class GeneticAthm():
                 print('Iter {} was saved!'.format(iteration))
             
                 if self.Valid is None:
+                    scores.append(self.Score)
+                else:
                     valscore = self.Valid(oh2seq(self.oh,self.invcharmap))
                     scores.append(valscore)
-                else:
-                    scores.append(self.Score)
+                    
                 if np.max(scores[-1]) > bestscore:
                     bestscore = np.max(scores[-1])
                 else:
@@ -137,9 +138,10 @@ class GeneticAthm():
         pdf = PdfPages(outdir+'/compared_with_natural.pdf')
         plt.figure()
         if self.Valid is None:
-            nat_score = self.Valid(self.Seqs)
-        else:
             nat_score = self.Predictor(self.Seqs)
+        else:
+            nat_score = self.Valid(self.Seqs)
+            
         plt.boxplot([nat_score,scores[-1]])
         plt.ylabel('Score')
         plt.xticks([1,2],['Natural','Optimized'])
@@ -178,13 +180,16 @@ class GeneticAthm():
         return Parent
     
     def delRep(self, Onehot, p):
-        I = set([])
+        I = set()
         n = Onehot.shape[0]
         i = 0
         while i < n-1:
             if i not in I:
-                a = np.tile(Onehot[i,:,:],(n-i))
-                I_new = set(np.where(np.sum(a != Onehot[(i+1):,:,:],axis=0) / (Onehot.shape[1]*2) < p)[0])
-                I = I|I_new
+                a = Onehot[i,:,:]
+                a = np.reshape(a,((1,)+a.shape))
+                a = np.repeat(a,n-i-1,axis=0)
+                I_new = np.where(( np.sum(np.abs(a - Onehot[(i+1):,:,:]),axis=(1,2)) / (Onehot.shape[1]*2) ) < p)[0]
+                I_new = I_new + i+1
+                I = I|set(I_new)
             i += 1
-        return I
+        return list(I)

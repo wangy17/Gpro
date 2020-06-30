@@ -37,7 +37,7 @@ seqout = seq[I[:100]]
 ```
 
 ### Demo 2: Design promoter highly expression in yeast cell
-To repressent all function of **Gpro**, we provide the design process of highly-expressed promoter in yeast cell. In this section, we applied genetic algorithm to optimize promoter sequences.
+To represent all function of **Gpro**, we provide the design process of highly-expressed promoter in yeast cell. In this section, we applied genetic algorithm to optimize promoter sequences.
 
 Train Generator use natural yeast core promoter:
 ```
@@ -57,7 +57,7 @@ Figure a present 6-mer frequences of natural promoter and generated promoter. Fi
 Train the Predictor using yeast expression data:
 ```
 pred = gpro.Predictors.CNN()
-pred.BuildModel('data/exp_yeastt.txt')
+pred.BuildModel('data/exp_yeast.txt')
 pred.Train()
 ```
 Predictor learn the motif features of yeast
@@ -68,7 +68,7 @@ Scatter of preditive value and true value would be saved at folder 'log/'.
 
 Using Genetic algorithm to optimize promoter sequences:
 ```
-opt = gpro.Optimizers.GeneticAthm(gen.Generator,pred.Pridictor)
+opt = gpro.Optimizers.GeneticAthm(gen.Generator,pred.Predictor)
 opt.run()
 ```
 Promoters optimized by Optimizer have higher expression than natural promoters
