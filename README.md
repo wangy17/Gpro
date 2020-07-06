@@ -1,4 +1,4 @@
-# GPrO: Generate, Predict and Optimize 3 steps to design artifitial promoters
+# GPrO: Generation, Prediction and Optimization - three steps to design artifitial promoters
 ## Install
 `git clone https://github.com/WangLabTHU/Gpro.git`
 ## Quick Start
