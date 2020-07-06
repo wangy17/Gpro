@@ -2,7 +2,7 @@
 ## Install
 `git clone https://github.com/WangLabTHU/Gpro.git`
 ## Quick Start
-Using our data to quick start Gpro
+Using our data to quick start GPrO
 ### Demo 1: Design constitutive promoters of E. coli
 In our previous research *'Synthetic promoter design in Escherichia coli based on a deep generative network'*, we designed artifitial promoters which had successfully expressed in E. coli. Using **Gpro** can easily reappear our result.
 
@@ -37,7 +37,7 @@ seqout = seq[I[:100]]
 ```
 
 ### Demo 2: Design promoter highly expression in yeast cell
-To represent all function of **Gpro**, we provide the design process of highly-expressed promoter in yeast cell. In this section, we applied genetic algorithm to optimize promoter sequences.
+To represent all function of **GPrO**, we provide the design process of highly-expressed promoter in yeast cell. In this section, we applied genetic algorithm to optimize promoter sequences.
 
 In this demo, the AAE model was trained as a generator by promoters on the yeast natural genome. Then the prediction model was trained with the MPRA experimental data in yeast cells(Lubliner, et al., 2015), and the transcriptional strength of downstream genes was predicted by the promoter sequence. The genetic algorithm was used to search for the promoter sequence with the highest expression in the predictor. As a result,the expression level of the optimized artificial promoters was significantly higher than that of the yeast natural promoter sequence (Supplementary figure S2). It proved that Dpro can optimize the promoters with certain functional characteristics. 
 
