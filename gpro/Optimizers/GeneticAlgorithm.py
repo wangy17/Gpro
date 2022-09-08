@@ -6,6 +6,7 @@ import random
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib as mpl
+import random
 mpl.use('Agg')
 
 
@@ -172,7 +173,7 @@ class GeneticAthm():
 
     def act(self, Parent):
         for i in range(Parent.shape[0]):
-            action = np.random.randint(0,1)
+            action = random.randint(0,1)
             if action == 0:
                 self.PMutate(Parent[i,:])
             elif action == 1:
